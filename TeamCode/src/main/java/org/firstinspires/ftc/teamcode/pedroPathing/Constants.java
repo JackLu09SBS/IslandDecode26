@@ -32,6 +32,8 @@ public class Constants {
             //After tuning all of above run tests.
             .useSecondaryTranslationalPIDF(true)
             .useSecondaryHeadingPIDF(true)
+            .forwardZeroPowerAcceleration(-38.44164)
+            .lateralZeroPowerAcceleration(-78.98164)
         .   useSecondaryDrivePIDF(true);
     public static MecanumConstants driveConstants = new MecanumConstants()
             .maxPower(1)
@@ -43,7 +45,10 @@ public class Constants {
             .leftFrontMotorDirection(DcMotorSimple.Direction.REVERSE)
             .leftRearMotorDirection(DcMotorSimple.Direction.REVERSE)
             .rightFrontMotorDirection(DcMotorSimple.Direction.FORWARD)
-            .rightRearMotorDirection(DcMotorSimple.Direction.FORWARD);
+            .rightRearMotorDirection(DcMotorSimple.Direction.FORWARD)
+            .xVelocity(88.3628778)
+            .yVelocity(69.0127749);
+
 
     public static PathConstraints pathConstraints = new PathConstraints(0.99, 100, 1, 1);
     // USE PORTS 0 and 3 for encoders. Mechanical advantages of those.
