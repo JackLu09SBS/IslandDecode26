@@ -18,22 +18,22 @@ public class Constants {
     public static FollowerConstants followerConstants = new FollowerConstants()
          .mass(10.61)
          // tune in order of PIDF. Translation,Heading, Drive, Centripetal.
-            .translationalPIDFCoefficients(new PIDFCoefficients(0.1, 0, 0.01, 0))
+            .translationalPIDFCoefficients(new PIDFCoefficients(0.005, 0, 0.01, 0))
             .secondaryTranslationalPIDFCoefficients(new PIDFCoefficients(0.1,0,0.01,0))
 
-//            .headingPIDFCoefficients(new PIDFCoefficients(0.1, 0, 0.01, 0))
-  //          .secondaryHeadingPIDFCoefficients(new PIDFCoefficients(0.1,0,0.01,0))
+            .headingPIDFCoefficients(new PIDFCoefficients(0.5, 0.01, 0.1, 0.1))
+          .secondaryHeadingPIDFCoefficients(new PIDFCoefficients(0.1,0,0.01,0))
             //Uncomment one by one while tuning pid. 
-    //        .drivePIDFCoefficients(new FilteredPIDFCoefficients(0.1,0.0,0.01,0.6,0.0))
-      //      .secondaryDrivePIDFCoefficients(new FilteredPIDFCoefficients(0.1,0,0.01,0.6,0.01))
+          .drivePIDFCoefficients(new FilteredPIDFCoefficients(0.2,0.0,0.02,0.6,0.0))
+    //    .secondaryDrivePIDFCoefficients(new FilteredPIDFCoefficients(0.1,0,0.01,0.6,0.01))
 
-            .centripetalScaling(0.005)
+            .centripetalScaling(0.000065)
 
             //After tuning all of above run tests.
             .useSecondaryTranslationalPIDF(true)
             .useSecondaryHeadingPIDF(true)
-            .forwardZeroPowerAcceleration(-38.44164)
-            .lateralZeroPowerAcceleration(-78.98164)
+         //   .forwardZeroPowerAcceleration(-33.88164)
+            // .lateralZeroPowerAcceleration(-63.65)
         .   useSecondaryDrivePIDF(true);
     public static MecanumConstants driveConstants = new MecanumConstants()
             .maxPower(1)
@@ -60,6 +60,7 @@ public class Constants {
             .forwardTicksToInches(0.001984)
             .strafeTicksToInches(-0.001987)
            .forwardEncoderDirection(Encoder.FORWARD)
+            .strafeEncoderDirection(Encoder.REVERSE)
 
             .IMU_HardwareMapName("imu")
             .IMU_Orientation(
