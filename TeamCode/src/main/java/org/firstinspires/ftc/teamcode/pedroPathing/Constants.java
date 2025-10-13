@@ -19,29 +19,29 @@ import com.pedropathing.control.FilteredPIDFCoefficients;
 
 public class Constants {
     public static FollowerConstants followerConstants = new FollowerConstants()
-<<<<<<< Updated upstream
+
             .mass(10.61)
             // tune in order of PIDF. Translation,Heading, Drive, Centripetal.
             .translationalPIDFCoefficients(new PIDFCoefficients(0.05, 0, 0.01, 0.5))
             .secondaryTranslationalPIDFCoefficients(new PIDFCoefficients(0.1,0,0.01,0))
 
 
-=======
          .mass(10.61)
          // tune in order of PIDF. Translation,Heading, Drive, Centripetal.
             .translationalPIDFCoefficients(new PIDFCoefficients(0.05, 0, 0.01, 0.5))
             .secondaryTranslationalPIDFCoefficients(new PIDFCoefficients(0.1,0,0.01,0))
 
->>>>>>> Stashed changes
+
+         .mass(10.61)
+         // tune in order of PIDF. Translation,Heading, Drive, Centripetal.
+            .translationalPIDFCoefficients(new PIDFCoefficients(0.05, 0, 0.01, 0.5))
+            .secondaryTranslationalPIDFCoefficients(new PIDFCoefficients(0.1,0,0.01,0))
+
             .headingPIDFCoefficients(new PIDFCoefficients(0.1, 0.01, 0.1, 0.35))
             .secondaryHeadingPIDFCoefficients(new PIDFCoefficients(0.1,0,0.01,0))
             //Uncomment one by one while tuning pid.
             .drivePIDFCoefficients(new FilteredPIDFCoefficients(0.01,0.0,0.001,0.6,0.025))
             .secondaryDrivePIDFCoefficients(new FilteredPIDFCoefficients(0.1,0,0.01,0.6,0.01))
-<<<<<<< Updated upstream
-
-=======
->>>>>>> Stashed changes
 
             .centripetalScaling(0.000065)
 
@@ -67,12 +67,6 @@ public class Constants {
             .yVelocity(57.8717747);
     //
 
-
-<<<<<<< Updated upstream
-
-
-=======
->>>>>>> Stashed changes
     public static PathConstraints pathConstraints = new PathConstraints(0.99, 100, 10, 1);
     // USE PORTS 0 and 3 for encoders. Mechanical advantages of those.
     public static TwoWheelConstants localizerConstants = new TwoWheelConstants()
