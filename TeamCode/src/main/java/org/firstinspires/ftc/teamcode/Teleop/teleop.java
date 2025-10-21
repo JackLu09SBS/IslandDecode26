@@ -13,11 +13,14 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import java.util.concurrent.TimeUnit;
 
 @TeleOp
-public class teleop extends LinearOpMode {enum AutoState { IDLE, ROTATING, SETTLING, PUSH, RETRACT }
+public class teleop extends LinearOpMode {
+    enum AutoState {IDLE, ROTATING, SETTLING, PUSH, RETRACT}
+
     AutoState autoState = AutoState.IDLE;
     boolean isAutoRunning = false;
-    int[] positions= {0,1200,2400};
+    int positions = 150;
     ElapsedTime autoTimer = new ElapsedTime();
+
     @Override
     public void runOpMode() throws InterruptedException {
         // Declare our motors
@@ -43,19 +46,17 @@ public class teleop extends LinearOpMode {enum AutoState { IDLE, ROTATING, SETTL
         // Constants
 
         boolean intakeOn = false;
-        boolean intakeReverse=false;
+        boolean intakeReverse = false;
         boolean PusherScore = false;
         boolean ShooterRunning = false;
-        double shooterVelocity=-1500;
-        int index=0;
+        double shooterVelocity = -1200;
+        int index = 0;
 
 
         waitForStart();
         if (isStopRequested()) return;
 
         while (opModeIsActive()) {
-
-
             //telemetry.update();
             double y = -gamepad1.left_stick_y; //front-back;  remember, Y stick value is reversed
             double x = gamepad1.left_stick_x; //left-right
@@ -89,12 +90,10 @@ public class teleop extends LinearOpMode {enum AutoState { IDLE, ROTATING, SETTL
 
             // Automated shooting
             if (gamepad1.dpadUpWasPressed() && autoState == AutoState.IDLE) {
-                index++;
-                if (index >= positions.length) index = 0;
-
-                magazine.setTargetPosition(positions[index]);
+                magazine.setTargetPosition(positions);
                 magazine.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                 magazine.setPower(1);
+                positions=positions-1000;
 
                 autoState = AutoState.ROTATING;
                 isAutoRunning = true;
@@ -140,36 +139,46 @@ public class teleop extends LinearOpMode {enum AutoState { IDLE, ROTATING, SETTL
                 if (ShooterRunning) {
                     shooter.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
                     shooter.setVelocity(shooterVelocity); // ? Pid to control velocity
-                    shooter.setVelocityPIDFCoefficients(1.0,1.0,1.0,1.0);
+
                 } else {
                     shooter.setPower(0);
                 }
             }
             // Just edit positions array once obtained
-            if(gamepad1.triangleWasPressed())
-            {
+            if (gamepad1.triangleWasPressed()) {
+                /*
                 index++;
-                if(index>=positions.length)
-                {
-                    index=0;
-                }
-                magazine.setTargetPosition(positions[index]);
+                if(index>=positions.length) {
+                    index = 0;
+                    for (int i = 0; i < 2; i++) {
+                        positions[i] = positions[i] + 1000;
+
+                    }
+                } */
+                positions = positions + 500;
+                magazine.setTargetPosition(positions);
                 magazine.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
                 magazine.setPower(1);
             }
 
-            if(gamepad1.dpadDownWasPressed())
-            {
+            if (gamepad1.dpadDownWasPressed()) {
+                /*
                 index--;
                 if(index<0)
                 {
                     index=positions.length-1;
                 }
-                magazine.setTargetPosition(positions[index]);
+                */
+
+                magazine.setTargetPosition(positions);
+                positions = positions - 500;
                 magazine.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                 magazine.setPower(1.0);
             }
-            if (gamepad1.dpadUpWasPressed() && autoState == AutoState.IDLE) {
+            telemetry.addData("Current Position", magazine.getCurrentPosition());
+
+          /*  if (gamepad1.dpadUpWasPressed() && autoState == AutoState.IDLE) {
                 // start automated cycle
                 index++;
                 if (index >= positions.length) index = 0;
@@ -185,24 +194,32 @@ public class teleop extends LinearOpMode {enum AutoState { IDLE, ROTATING, SETTL
             telemetry.addData("Auto State", autoState);
             telemetry.addData("Servo Pos", servo.getPosition());
             telemetry.update();
+            */
             if (gamepad1.circleWasPressed()) {
-                PusherScore = !PusherScore;
-                if (PusherScore) {
+                PusherScore=!PusherScore;
+                if(PusherScore)
+                {
                     servo.setPosition(.4);
-                } else {
-                    servo.setPosition(.9);
                 }
+                else{
+                    {
+                        servo.setPosition(.9);
+
+                    }
+
             }
-            if(gamepad1.leftBumperWasPressed())
+            if(gamepad1.dpad_left)
             {
-                intakeReverse=!intakeReverse;
-                intakeOn=false;
-                if(intakeReverse)
-                {
+                magazine.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                positions=positions+10;
+                magazine.setTargetPosition(positions);
+            }
+            if (gamepad1.leftBumperWasPressed()) {
+                intakeReverse = !intakeReverse;
+                intakeOn = false;
+                if (intakeReverse) {
                     intake.setPower(0.6);
-                }
-                else
-                {
+                } else {
                     intake.setPower(0);
                 }
 
@@ -218,4 +235,5 @@ public class teleop extends LinearOpMode {enum AutoState { IDLE, ROTATING, SETTL
             }
         }
     }
+}
 }

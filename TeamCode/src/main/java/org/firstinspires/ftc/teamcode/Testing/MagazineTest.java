@@ -12,12 +12,34 @@ public class MagazineTest extends LinearOpMode {
     @Override
     public void runOpMode() {
         Magazine magazine = new Magazine(hardwareMap);
-
+        targetPosition=0;
         waitForStart();
 
         while (opModeIsActive()) {
-            magazine.setTargetPosition(targetPosition);
+            if(gamepad1.triangleWasPressed())
+            {
+                targetPosition=targetPosition-100;
+                magazine.setTargetPosition(targetPosition);
 
+            }
+            if(gamepad1.squareWasPressed())
+            {
+              targetPosition=targetPosition+10;
+                magazine.setTargetPosition(targetPosition);
+
+            }
+            if(gamepad1.circleWasPressed())
+            {
+                targetPosition=targetPosition+100;
+                magazine.setTargetPosition(targetPosition);
+
+            }
+            if(gamepad1.crossWasPressed())
+            {
+                targetPosition=targetPosition-10;
+                magazine.setTargetPosition(targetPosition);
+
+            }
             telemetry.addData("Target Position", targetPosition);
             telemetry.addData("Current Position", magazine.getCurrentPosition());
             telemetry.update();
