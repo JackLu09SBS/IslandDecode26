@@ -16,7 +16,7 @@ public class teleop extends LinearOpMode {
 
     AutoState autoState = AutoState.IDLE;
     boolean isAutoRunning = false;
-    int positions = 150;
+    int positions = 0;
     ElapsedTime autoTimer = new ElapsedTime();
 
     @Override
@@ -34,6 +34,8 @@ public class teleop extends LinearOpMode {
         shooter.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         shooter.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         shooter.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+        magazine.setTargetPosition(0);
+        magazine.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
         // Reverse the left side motors.
         frontRightMotor.setDirection(DcMotorSimple.Direction.FORWARD);
@@ -55,6 +57,7 @@ public class teleop extends LinearOpMode {
         if (isStopRequested()) return;
 
         while (opModeIsActive()) {
+
             //telemetry.update();
             double y = -gamepad1.left_stick_y; //front-back;  remember, Y stick value is reversed
             double x = gamepad1.left_stick_x; //left-right
@@ -87,10 +90,11 @@ public class teleop extends LinearOpMode {
             }
 
             // Automated shooting
+
             if (gamepad1.dpadUpWasPressed() && autoState == AutoState.IDLE) {
                 magazine.setTargetPosition(positions);
                 magazine.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                magazine.setPower(1);
+                magazine.setPower(.5);
                 positions=positions-1000;
 
                 autoState = AutoState.ROTATING;
@@ -153,14 +157,18 @@ public class teleop extends LinearOpMode {
 
                     }
                 } */
-                positions = positions + 500;
+                positions = positions + 480;
                 magazine.setTargetPosition(positions);
-                magazine.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
-                magazine.setPower(1);
+                magazine.setPower(0.3);
             }
-
-            if (gamepad1.dpadDownWasPressed()) {
+if(gamepad1.dpadRightWasPressed())
+{
+    positions=positions+30;
+    magazine.setTargetPosition(positions);
+    magazine.setPower(1.0);
+}
+            if (gamepad1.dpadLeftWasPressed()) {
                 /*
                 index--;
                 if(index<0)
@@ -168,14 +176,21 @@ public class teleop extends LinearOpMode {
                     index=positions.length-1;
                 }
                 */
+                positions = positions - 30;
 
                 magazine.setTargetPosition(positions);
-                positions = positions - 500;
-                magazine.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                 magazine.setPower(1.0);
             }
-            telemetry.addData("Current Position", magazine.getCurrentPosition());
 
+            telemetry.addData("Current Position", magazine.getCurrentPosition());
+            if (gamepad2.right_stick_button) {
+                magazine.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+                magazine.setPower(-gamepad2.right_stick_y/5);
+            }
+            else{
+                magazine.setPower(0);
+                magazine.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            }
           /*  if (gamepad1.dpadUpWasPressed() && autoState == AutoState.IDLE) {
                 // start automated cycle
                 index++;
@@ -194,22 +209,14 @@ public class teleop extends LinearOpMode {
             telemetry.update();
             */
             if (gamepad1.circleWasPressed()) {
-                PusherScore=!PusherScore;
-                if(PusherScore)
-                {
-                    servo.setPosition(.4);
-                }
-                else{
-                    {
-                        servo.setPosition(.9);
 
-                    }
+                servo.setPosition(.4);
+                sleep(900);
+                servo.setPosition(1);
+                          }
 
-            }
-            if(gamepad1.dpad_left)
+                if(gamepad1.dpad_left)
             {
-                magazine.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                positions=positions+10;
                 magazine.setTargetPosition(positions);
             }
             if (gamepad1.leftBumperWasPressed()) {
@@ -234,4 +241,4 @@ public class teleop extends LinearOpMode {
         }
     }
 }
-}
+
