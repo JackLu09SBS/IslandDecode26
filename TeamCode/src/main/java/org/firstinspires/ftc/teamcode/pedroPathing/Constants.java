@@ -37,10 +37,10 @@ public class Constants {
             .translationalPIDFCoefficients(new PIDFCoefficients(0.05, 0, 0.01, 0.5))
             .secondaryTranslationalPIDFCoefficients(new PIDFCoefficients(0.1,0,0.01,0))
 
-            .headingPIDFCoefficients(new PIDFCoefficients(0.1, 0.01, 0.1, 0.35))
+            .headingPIDFCoefficients(new PIDFCoefficients(0.1, 0.01, 0.15, 0.2))
             .secondaryHeadingPIDFCoefficients(new PIDFCoefficients(0.1,0,0.01,0))
             //Uncomment one by one while tuning pid.
-            .drivePIDFCoefficients(new FilteredPIDFCoefficients(0.01,0.0,0.001,0.6,0.025))
+            .drivePIDFCoefficients(new FilteredPIDFCoefficients(0.01,0.0,0.001,0.6,0.0001))
             .secondaryDrivePIDFCoefficients(new FilteredPIDFCoefficients(0.1,0,0.01,0.6,0.01))
 
             .centripetalScaling(0.000065)
@@ -49,8 +49,8 @@ public class Constants {
             //After tuning all of above run tests.
             .useSecondaryTranslationalPIDF(true)
             .useSecondaryHeadingPIDF(true)
-            .forwardZeroPowerAcceleration(-38.44164)
-            .lateralZeroPowerAcceleration(-78.61543)
+            .forwardZeroPowerAcceleration(-8196.71)
+            .lateralZeroPowerAcceleration(-43.7035)
             .useSecondaryDrivePIDF(true);
     public static MecanumConstants driveConstants = new MecanumConstants()
             .maxPower(1)
@@ -63,25 +63,25 @@ public class Constants {
             .leftRearMotorDirection(DcMotorSimple.Direction.REVERSE)
             .rightFrontMotorDirection(DcMotorSimple.Direction.FORWARD)
             .rightRearMotorDirection(DcMotorSimple.Direction.FORWARD)
-            .xVelocity(77.1308918)
-            .yVelocity(57.8717747);
+            .xVelocity(250.7586)
+            .yVelocity(220.33773);
     //
 
     public static PathConstraints pathConstraints = new PathConstraints(0.99, 100, 10, 1);
     // USE PORTS 0 and 3 for encoders. Mechanical advantages of those.
     public static TwoWheelConstants localizerConstants = new TwoWheelConstants()
-            .forwardEncoder_HardwareMapName("leftBack")
-            .strafeEncoder_HardwareMapName("rightBack")
-            .strafePodX(-5.2)
-            .forwardPodY(1.2)
-            .forwardTicksToInches(0.001984)
-            .strafeTicksToInches(-0.001987)
+            .forwardEncoder_HardwareMapName("rightBack")
+            .strafeEncoder_HardwareMapName("leftBack")
+            .strafePodX(-6.5)
+            .forwardPodY(.2)
+            .forwardTicksToInches(0.001943365794)
+            .strafeTicksToInches(0.0020468531)
             .forwardEncoderDirection(Encoder.FORWARD)
             .strafeEncoderDirection(Encoder.REVERSE)
             .IMU_HardwareMapName("imu")
             .IMU_Orientation(
                     new RevHubOrientationOnRobot(
-                            RevHubOrientationOnRobot.LogoFacingDirection.UP,
+                            RevHubOrientationOnRobot.LogoFacingDirection.RIGHT,
                             RevHubOrientationOnRobot.UsbFacingDirection.FORWARD
                     )
             );

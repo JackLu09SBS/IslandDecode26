@@ -22,7 +22,7 @@ public class teleop extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
         // Declare our motors
-        DcMotor frontLeftMotor = hardwareMap.dcMotor.get("frontLeft");
+        DcMotor frontLeftMotor = hardwareMap.dcMotor.get("leftFront");
         DcMotor backLeftMotor = hardwareMap.dcMotor.get("leftBack");
         DcMotor frontRightMotor = hardwareMap.dcMotor.get("rightFront");
         DcMotor backRightMotor = hardwareMap.dcMotor.get("rightBack");
