@@ -40,10 +40,10 @@ public class Constants {
             .headingPIDFCoefficients(new PIDFCoefficients(0.1, 0.01, 0.15, 0.2))
             .secondaryHeadingPIDFCoefficients(new PIDFCoefficients(0.1,0,0.01,0))
             //Uncomment one by one while tuning pid.
-            .drivePIDFCoefficients(new FilteredPIDFCoefficients(0.01,0.0,0.001,0.6,0.0001))
+            .drivePIDFCoefficients(new FilteredPIDFCoefficients(0.01,0.0,0.01,0.6,0.01))
             .secondaryDrivePIDFCoefficients(new FilteredPIDFCoefficients(0.1,0,0.01,0.6,0.01))
 
-            .centripetalScaling(0.000065)
+            .centripetalScaling(0.0065)
 
 
             //After tuning all of above run tests.
@@ -65,9 +65,10 @@ public class Constants {
             .rightRearMotorDirection(DcMotorSimple.Direction.FORWARD)
             .xVelocity(250.7586)
             .yVelocity(220.33773);
+
     //
 
-    public static PathConstraints pathConstraints = new PathConstraints(0.99, 100, 10, 1);
+    public static PathConstraints pathConstraints = new PathConstraints(0.99, 100, 1, 1);
     // USE PORTS 0 and 3 for encoders. Mechanical advantages of those.
     public static TwoWheelConstants localizerConstants = new TwoWheelConstants()
             .forwardEncoder_HardwareMapName("rightBack")
