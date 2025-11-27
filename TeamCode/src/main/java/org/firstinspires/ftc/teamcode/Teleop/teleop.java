@@ -12,11 +12,9 @@ import java.util.concurrent.TimeUnit;
 
 @TeleOp
 public class teleop extends LinearOpMode {
-    enum AutoState {IDLE, ROTATING, SETTLING, PUSH, RETRACT}
-
-    AutoState autoState = AutoState.IDLE;
     boolean isAutoRunning = false;
     int positions = 0;
+
     ElapsedTime autoTimer = new ElapsedTime();
 
     @Override
@@ -49,10 +47,8 @@ public class teleop extends LinearOpMode {
         boolean intakeReverse = false;
         boolean PusherScore = false;
         boolean ShooterRunning = false;
-        double shooterVelocity = -1200;
-        int index = 0;
 
-
+        double shooterVelocityFar=-1300;
         waitForStart();
         if (isStopRequested()) return;
 
@@ -88,53 +84,20 @@ public class teleop extends LinearOpMode {
                 frontRightMotor.setPower(frontRightPower / 3);
                 backRightMotor.setPower(backRightPower / 3);
             }
-
             // Automated shooting
+            if (gamepad1.dpad_up) {
 
-            if (gamepad1.dpadUpWasPressed() && autoState == AutoState.IDLE) {
+                positions -= 250;                      // spin to next ball
                 magazine.setTargetPosition(positions);
-                magazine.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                magazine.setPower(.5);
-                positions=positions-1000;
+                magazine.setPower(0.3);
+                sleep(400);
 
-                autoState = AutoState.ROTATING;
-                isAutoRunning = true;
+                servo.setPosition(.05);
+                sleep(200);
+                servo.setPosition(0.6);
+
             }
-            switch (autoState) {
-                case ROTATING:
-                    if (!magazine.isBusy()) {   // reached new slot
-                        autoTimer.reset();
-                        autoState = AutoState.SETTLING;
-                    }
-                    break;
 
-                case SETTLING:
-                    if (autoTimer.milliseconds() > 150) { // Pause
-                        servo.setPosition(0.4);           // push to shoot
-                        autoTimer.reset();
-                        autoState = AutoState.PUSH;
-                    }
-                    break;
-
-                case PUSH:
-                    if (autoTimer.milliseconds() > 200) { // Pause
-                        servo.setPosition(0.9);           // retract
-                        autoTimer.reset();
-                        autoState = AutoState.RETRACT;
-                    }
-                    break;
-
-                case RETRACT:
-                    if (autoTimer.milliseconds() > 150) { // allow retraction
-                        autoState = AutoState.IDLE;
-                        isAutoRunning = false;
-                    }
-                    break;
-
-                case IDLE:
-                default:
-                    break;
-            }
 
             if (gamepad1.squareWasPressed()) {
                 ShooterRunning = !ShooterRunning;
@@ -148,26 +111,17 @@ public class teleop extends LinearOpMode {
             }
             // Just edit positions array once obtained
             if (gamepad1.triangleWasPressed()) {
-                /*
-                index++;
-                if(index>=positions.length) {
-                    index = 0;
-                    for (int i = 0; i < 2; i++) {
-                        positions[i] = positions[i] + 1000;
 
-                    }
-                } */
-                positions = positions + 480;
+                positions = positions - 250;
                 magazine.setTargetPosition(positions);
 
                 magazine.setPower(0.3);
             }
-if(gamepad1.dpadRightWasPressed())
-{
-    positions=positions+30;
-    magazine.setTargetPosition(positions);
-    magazine.setPower(1.0);
-}
+            if (gamepad1.dpadRightWasPressed()) {
+                positions = positions + 30;
+                magazine.setTargetPosition(positions);
+                magazine.setPower(1.0);
+            }
             if (gamepad1.dpadLeftWasPressed()) {
                 /*
                 index--;
@@ -183,6 +137,7 @@ if(gamepad1.dpadRightWasPressed())
             }
 
             telemetry.addData("Current Position", magazine.getCurrentPosition());
+         /*
             if (gamepad2.right_stick_button) {
                 magazine.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
                 magazine.setPower(-gamepad2.right_stick_y/5);
@@ -191,34 +146,15 @@ if(gamepad1.dpadRightWasPressed())
                 magazine.setPower(0);
                 magazine.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             }
-          /*  if (gamepad1.dpadUpWasPressed() && autoState == AutoState.IDLE) {
-                // start automated cycle
-                index++;
-                if (index >= positions.length) index = 0;
+          */
 
-                magazine.setTargetPosition(positions[index]);
-                magazine.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                magazine.setPower(1);
-
-                autoState = AutoState.ROTATING;
-                isAutoRunning = true;
+            if (gamepad2.circleWasPressed()) {
+                servo.setPosition(.05);
+                sleep(200);
+                servo.setPosition(0.6);
             }
-            telemetry.addData("Magazine Index", index);
-            telemetry.addData("Auto State", autoState);
-            telemetry.addData("Servo Pos", servo.getPosition());
-            telemetry.update();
-            */
-            if (gamepad1.circleWasPressed()) {
 
-                servo.setPosition(.4);
-                sleep(900);
-                servo.setPosition(1);
-                          }
 
-                if(gamepad1.dpad_left)
-            {
-                magazine.setTargetPosition(positions);
-            }
             if (gamepad1.leftBumperWasPressed()) {
                 intakeReverse = !intakeReverse;
                 intakeOn = false;

@@ -1,7 +1,11 @@
-package org.firstinspires.ftc.teamcode.Testing;
+package org.firstinspires.ftc.teamcode.configurables;
+import com.bylazar.configurables.annotations.Configurable;
+
+
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import org.firstinspires.ftc.teamcode.Subsystems.Magazine;
+@Configurable
 @TeleOp(name = "Magazine Tuner")
 public class MagazineTest extends LinearOpMode {
 
