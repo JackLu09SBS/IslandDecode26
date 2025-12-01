@@ -109,6 +109,7 @@ public class teleop extends LinearOpMode {
                 autoIntake = !autoIntake;
                 spun = false;
             }
+
                 if (autoIntake) {
                     int r = colorSensor.red();
                     int g = colorSensor.green();
@@ -122,7 +123,7 @@ public class teleop extends LinearOpMode {
                     } else {
                         intake.setPower(0);
                         if (!spun && timer.milliseconds() > 150) {
-                            if (rotationTimes != 2 % 3) {
+                            if (rotationTimes%3 != 2) {
                                 positions = positions - 250;
                                 magazine.setTargetPosition(positions);
                                 spun = true;
@@ -131,7 +132,9 @@ public class teleop extends LinearOpMode {
                         }
                     }
 
-                }
+                } //else {
+//                    intake.setPower(0);
+//                }
 
                 if (gamepad1.squareWasPressed()) {
                     ShooterRunning = !ShooterRunning;
