@@ -7,6 +7,7 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
+import com.qualcomm.robotcore.hardware.ColorSensor;
 
 import java.util.concurrent.TimeUnit;
 
@@ -28,7 +29,7 @@ public class teleop extends LinearOpMode {
         DcMotor intake = hardwareMap.dcMotor.get("intake");
         DcMotor magazine = hardwareMap.dcMotor.get("magazine");
         Servo servo = hardwareMap.servo.get("servo");
-
+        ColorSensor colorSensor = hardwareMap.get(ColorSensor.class, "colorSensor");
         shooter.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         shooter.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         shooter.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
@@ -47,8 +48,14 @@ public class teleop extends LinearOpMode {
         boolean intakeReverse = false;
         boolean PusherScore = false;
         boolean ShooterRunning = false;
+        boolean autoIntake = false;
 
-        double shooterVelocityFar=-1300;
+        boolean spun=false;
+boolean wasTan=false;
+        double shooterVelocity = -990;
+        double shooterVelocityFar = -1300;
+        ElapsedTime timer = new ElapsedTime();
+
         waitForStart();
         if (isStopRequested()) return;
 
@@ -88,55 +95,74 @@ public class teleop extends LinearOpMode {
             if (gamepad1.dpad_up) {
 
                 positions -= 250;                      // spin to next ball
-                magazine.setTargetPosition(positions);
-                magazine.setPower(0.3);
-                sleep(400);
-
                 servo.setPosition(.05);
                 sleep(200);
                 servo.setPosition(0.6);
+                sleep(300);
+                magazine.setTargetPosition(positions);
+                magazine.setPower(0.7);
+
 
             }
+            if (gamepad1.crossWasPressed()) {
+               autoIntake=!autoIntake;
+               spun=false;
+            }
+            if (autoIntake) {
+                int r = colorSensor.red();
+                int g = colorSensor.green();
+                int b = colorSensor.blue();
 
-
-            if (gamepad1.squareWasPressed()) {
-                ShooterRunning = !ShooterRunning;
-                if (ShooterRunning) {
-                    shooter.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-                    shooter.setVelocity(shooterVelocity); // ? Pid to control velocity
-
-                } else {
-                    shooter.setPower(0);
+                boolean isTan = g > 50 && g < 80 && r > 30 && r < 50 && b > 30 && b < 55;
+                if (isTan) {
+                    intake.setPower(0.75);
+                    timer.reset();
+                    spun=false;
                 }
-            }
-            // Just edit positions array once obtained
-            if (gamepad1.triangleWasPressed()) {
 
-                positions = positions - 250;
-                magazine.setTargetPosition(positions);
+                else {
+                    intake.setPower(0);
+                    if(!spun && timer.milliseconds()>150) {
+                            positions = positions - 250;
+                            magazine.setTargetPosition(positions);
+                            spun = true;
+                        }
+                    }
 
-                magazine.setPower(0.3);
             }
-            if (gamepad1.dpadRightWasPressed()) {
-                positions = positions + 30;
-                magazine.setTargetPosition(positions);
-                magazine.setPower(1.0);
-            }
-            if (gamepad1.dpadLeftWasPressed()) {
-                /*
-                index--;
-                if(index<0)
-                {
-                    index=positions.length-1;
+
+                if (gamepad1.squareWasPressed()) {
+                    ShooterRunning = !ShooterRunning;
+                    if (ShooterRunning) {
+                        shooter.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                        shooter.setVelocity(shooterVelocity); // ? Pid to control velocity
+
+                    } else {
+                        shooter.setPower(0);
+                    }
                 }
-                */
-                positions = positions - 30;
+                // Just edit positions array once obtained
+                if (gamepad1.triangleWasPressed()) {
 
-                magazine.setTargetPosition(positions);
-                magazine.setPower(1.0);
-            }
+                    positions = positions - 250;
+                    magazine.setTargetPosition(positions);
 
-            telemetry.addData("Current Position", magazine.getCurrentPosition());
+                    magazine.setPower(0.3);
+                }
+                if (gamepad1.dpadRightWasPressed()) {
+                    positions = positions + 30;
+                    magazine.setTargetPosition(positions);
+                    magazine.setPower(1.0);
+                }
+                if (gamepad1.dpadLeftWasPressed()) {
+
+                    positions = positions - 30;
+
+                    magazine.setTargetPosition(positions);
+                    magazine.setPower(1.0);
+                }
+
+  //              telemetry.addData("Current Position", magazine.getCurrentPosition());
          /*
             if (gamepad2.right_stick_button) {
                 magazine.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -148,33 +174,37 @@ public class teleop extends LinearOpMode {
             }
           */
 
-            if (gamepad2.circleWasPressed()) {
-                servo.setPosition(.05);
-                sleep(200);
-                servo.setPosition(0.6);
-            }
-
-
-            if (gamepad1.leftBumperWasPressed()) {
-                intakeReverse = !intakeReverse;
-                intakeOn = false;
-                if (intakeReverse) {
-                    intake.setPower(0.6);
-                } else {
-                    intake.setPower(0);
+                if (gamepad1.circleWasPressed()) {
+                    servo.setPosition(.05);
+                    sleep(200);
+                    servo.setPosition(0.6);
                 }
 
-            }
-            if (gamepad1.rightBumperWasPressed()) {
-                intakeOn = !intakeOn;
-                if (intakeOn) {
-                    intake.setPower(-0.6);
-                } else {
-                    intake.setPower(0);
-                }
 
-            }
+                if (gamepad1.leftBumperWasPressed()) {
+                    intakeReverse = !intakeReverse;
+                    intakeOn = false;
+                    if (intakeReverse) {
+                        intake.setPower(0.6);
+                    } else {
+                        intake.setPower(0);
+                    }
+
+                }
+                if (gamepad1.rightBumperWasPressed()) {
+                    intakeOn = !intakeOn;
+                    if (intakeOn) {
+                        intake.setPower(-0.6);
+                    } else {
+                        intake.setPower(0);
+                    }
+
+                }
         }
     }
 }
+
+
+
+
 
