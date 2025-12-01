@@ -43,17 +43,18 @@ public class teleop extends LinearOpMode {
         backLeftMotor.setDirection(DcMotorSimple.Direction.REVERSE);
 
         // Constants
-
         boolean intakeOn = false;
         boolean intakeReverse = false;
         boolean PusherScore = false;
         boolean ShooterRunning = false;
         boolean autoIntake = false;
 
-        boolean spun=false;
-boolean wasTan=false;
+        boolean spun = false;
+        boolean wasTan = false;
         double shooterVelocity = -990;
         double shooterVelocityFar = -1300;
+        int rotationTimes = 0;
+
         ElapsedTime timer = new ElapsedTime();
 
         waitForStart();
@@ -105,31 +106,32 @@ boolean wasTan=false;
 
             }
             if (gamepad1.crossWasPressed()) {
-               autoIntake=!autoIntake;
-               spun=false;
+                autoIntake = !autoIntake;
+                spun = false;
             }
-            if (autoIntake) {
-                int r = colorSensor.red();
-                int g = colorSensor.green();
-                int b = colorSensor.blue();
+                if (autoIntake) {
+                    int r = colorSensor.red();
+                    int g = colorSensor.green();
+                    int b = colorSensor.blue();
 
-                boolean isTan = g > 50 && g < 80 && r > 30 && r < 50 && b > 30 && b < 55;
-                if (isTan) {
-                    intake.setPower(0.75);
-                    timer.reset();
-                    spun=false;
-                }
-
-                else {
-                    intake.setPower(0);
-                    if(!spun && timer.milliseconds()>150) {
-                            positions = positions - 250;
-                            magazine.setTargetPosition(positions);
-                            spun = true;
+                    boolean isTan = g > 50 && g < 80 && r > 30 && r < 50 && b > 30 && b < 55;
+                    if (isTan) {
+                        intake.setPower(0.75);
+                        timer.reset();
+                        spun = false;
+                    } else {
+                        intake.setPower(0);
+                        if (!spun && timer.milliseconds() > 150) {
+                            if (rotationTimes != 2 % 3) {
+                                positions = positions - 250;
+                                magazine.setTargetPosition(positions);
+                                spun = true;
+                                rotationTimes = rotationTimes + 1;
+                            }
                         }
                     }
 
-            }
+                }
 
                 if (gamepad1.squareWasPressed()) {
                     ShooterRunning = !ShooterRunning;
@@ -162,7 +164,7 @@ boolean wasTan=false;
                     magazine.setPower(1.0);
                 }
 
-  //              telemetry.addData("Current Position", magazine.getCurrentPosition());
+                //              telemetry.addData("Current Position", magazine.getCurrentPosition());
          /*
             if (gamepad2.right_stick_button) {
                 magazine.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -175,9 +177,18 @@ boolean wasTan=false;
           */
 
                 if (gamepad1.circleWasPressed()) {
-                    servo.setPosition(.05);
-                    sleep(200);
                     servo.setPosition(0.6);
+                    sleep(100);
+                    servo.setPosition(.05);
+                    sleep(400);
+                    servo.setPosition(0.6);
+                    sleep(100);
+                    if (rotationTimes == 2%3){
+                        rotationTimes = rotationTimes + 1;
+                    }
+
+
+
                 }
 
 
@@ -200,11 +211,8 @@ boolean wasTan=false;
                     }
 
                 }
+            }
         }
     }
-}
-
-
-
 
 
