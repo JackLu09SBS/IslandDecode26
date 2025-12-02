@@ -96,16 +96,17 @@ public class teleop extends LinearOpMode {
             if (gamepad1.dpad_up) {
 
                 positions -= 250;                      // spin to next ball
-                servo.setPosition(.05);
+                servo.setPosition(.6);
                 sleep(200);
-                servo.setPosition(0.6);
+                servo.setPosition(0.05);
                 sleep(300);
                 magazine.setTargetPosition(positions);
                 magazine.setPower(0.7);
 
 
             }
-            if (gamepad1.crossWasPressed()) {
+            if (gamepad1.crossWasPressed())
+            {
                 autoIntake = !autoIntake;
             // Commented out for now test how it works    spun = false;
                 if (autoIntake)
