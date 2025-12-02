@@ -4,7 +4,7 @@ import com.bylazar.configurables.annotations.Configurable;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import org.firstinspires.ftc.teamcode.Subsystems.Magazine;
+import org.firstinspires.ftc.teamcode.Subsystems.storage;
 @Configurable
 @TeleOp(name = "Magazine Tuner")
 public class MagazineTest extends LinearOpMode {
@@ -15,7 +15,7 @@ public class MagazineTest extends LinearOpMode {
 
     @Override
     public void runOpMode() {
-        Magazine magazine = new Magazine(hardwareMap);
+        storage magazine = new storage(hardwareMap);
         targetPosition=0;
         waitForStart();
 
