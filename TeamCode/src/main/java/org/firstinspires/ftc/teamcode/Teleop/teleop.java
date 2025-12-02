@@ -41,6 +41,7 @@ public class teleop extends LinearOpMode {
         backRightMotor.setDirection(DcMotorSimple.Direction.FORWARD);
         frontLeftMotor.setDirection(DcMotorSimple.Direction.REVERSE);
         backLeftMotor.setDirection(DcMotorSimple.Direction.REVERSE);
+        colorSensor.enableLed(true);  // Turn on sensor's LED
 
         // Constants
         boolean intakeOn = false;
@@ -96,19 +97,16 @@ public class teleop extends LinearOpMode {
             if (gamepad1.dpad_up) {
 
                 positions -= 250;                      // spin to next ball
-<<<<<<< HEAD
                 servo.setPosition(0.6);
                 sleep(100);
                 servo.setPosition(.05);
                 sleep(400);
                 servo.setPosition(0.6);
                 sleep(100);
-=======
                 servo.setPosition(.6);
                 sleep(200);
                 servo.setPosition(0.05);
                 sleep(300);
->>>>>>> e6e95d9c3fb7068c4f4e3b98175ca59a0f5bca99
                 magazine.setTargetPosition(positions);
                 magazine.setPower(0.7);
 
@@ -117,6 +115,8 @@ public class teleop extends LinearOpMode {
             if (gamepad1.crossWasPressed())
             {
                 autoIntake = !autoIntake;
+                spun=false;
+
             // Commented out for now test how it works    spun = false;
                 if (autoIntake)
                 {
@@ -125,6 +125,11 @@ public class teleop extends LinearOpMode {
                     int b = colorSensor.blue();
 
                     boolean isTan = g > 50 && g < 80 && r > 30 && r < 50 && b > 30 && b < 55;
+                    telemetry.addData("Red", r);
+                    telemetry.addData("Green", g);
+                    telemetry.addData("Blue", b);
+                    telemetry.addData("Is Tan?", isTan);
+                    telemetry.update();
                     if (isTan) {
                         intake.setPower(0.8);
                         timer.reset();
@@ -142,10 +147,10 @@ public class teleop extends LinearOpMode {
                         }
                     }
                 }
-                else
-                {
-                    intake.setPower(0);
-                }
+     //           else
+       //         {
+         //           intake.setPower(0);
+          //      }
             } //else {
 //                    intake.setPower(0);
 //                }
@@ -183,16 +188,18 @@ public class teleop extends LinearOpMode {
 
                 //              telemetry.addData("Current Position", magazine.getCurrentPosition());
          /*
-            if (gamepad2.right_stick_button) {
-                magazine.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-                magazine.setPower(-gamepad2.right_stick_y/5);
-            }
-            else{
-                magazine.setPower(0);
-                magazine.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            }
-          */
 
+          */
+            if (gamepad1.right_stick_button) {
+                ShooterRunning = !ShooterRunning;
+                if (ShooterRunning) {
+                    shooter.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                    shooter.setVelocity(shooterVelocityFar); // ? Pid to control velocity
+
+                } else {
+                    shooter.setPower(0);
+                }
+            }
                 if (gamepad1.circleWasPressed()) {
                     servo.setPosition(0.6);
                     sleep(100);

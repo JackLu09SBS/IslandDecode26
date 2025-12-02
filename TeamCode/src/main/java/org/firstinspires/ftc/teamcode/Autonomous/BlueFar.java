@@ -1,261 +1,256 @@
 package org.firstinspires.ftc.teamcode.Autonomous;
 
-import com.bylazar.configurables.annotations.Configurable;
 import com.pedropathing.follower.Follower;
-import com.pedropathing.geometry.BezierCurve;
 import com.pedropathing.geometry.BezierLine;
+import com.pedropathing.geometry.BezierCurve;
 import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.PathChain;
+import com.pedropathing.util.Timer;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.Servo;
-
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
-@Autonomous(name = "Pedro Pathing Autonomous", group = "Autonomous")
-@Configurable
+@Autonomous(name = "BlueFarWorking", group = "Autonomous")
 public class BlueFar extends LinearOpMode {
 
-    // PedroPathing follower + paths
+    // ---------- PATHING ----------
     private Follower follower;
     private Paths paths;
+    private int pathState = 0;
 
-    // Shooter + feeder hardware
+    // ---------- HARDWARE ----------
     private DcMotorEx shooterMotor;
     private DcMotorEx magazine;
-    private Servo feederServo;
-
-    // Roller / intake
     private DcMotor roller;
-
-    // Magazine encoder position (your original "positions" var)
-    private int positions = 0;
+    private Servo feederServo;
+    private int positions = 0; // magazine index
+    private ElapsedTime stateTimer = new ElapsedTime();
+    public boolean actionStarted;
 
     @Override
     public void runOpMode() throws InterruptedException {
 
-        // --- PedroPathing setup ---
-        follower = Constants.createFollower(hardwareMap);
-        follower.setStartingPose(new Pose(56, 7.5, Math.toRadians(90)));
-        paths = new Paths(follower);
 
-        // --- Map hardware (names must match your config) ---
+        // ---------------- HARDWARE MAP ----------------
         shooterMotor = hardwareMap.get(DcMotorEx.class, "shooter");
         magazine     = hardwareMap.get(DcMotorEx.class, "magazine");
-        roller       = hardwareMap.get(DcMotor.class,   "roller");
-        feederServo  = hardwareMap.get(Servo.class,     "feeder");
+        roller       = hardwareMap.get(DcMotor.class, "intake");
+        feederServo  = hardwareMap.get(Servo.class, "servo");
 
-        // Magazine setup
+        magazine.setTargetPosition(0);
         magazine.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         magazine.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         magazine.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
-        // Initial mechanism states
-        shooterMotor.setPower(0);
-        feederServo.setPosition(0.05);
-        roller.setPower(0.0);
+        feederServo.setPosition(0.6); // neutral
 
-        // Shooter runs fast the whole autonomous
-        startShooterFast();
+        // ---------- PATHING INIT ----------
+        follower = Constants.createFollower(hardwareMap);
+        follower.setStartingPose(new Pose(56, 7.5, Math.toRadians(90)));
+        paths = new Paths(follower);
 
-        telemetry.addLine("BlueFar Initialized");
+        telemetry.addLine("READY — Press PLAY");
         telemetry.update();
-
         waitForStart();
         if (isStopRequested()) return;
 
-        // ================== SEQUENCE ==================
+        // ---------------- AUTONOMOUS LOOP ----------------
+        while (opModeIsActive() && pathState != -1) {
+            follower.update();
 
-        // 1) Path1
-        followAndWait(paths.Path1);
+            switch (pathState) {
 
-        // After Path1: turn on roller
-        roller();
+                case 0:
+                    // Start path once
+                    if (!follower.isBusy() && !actionStarted) {
+                        follower.followPath(paths.line1);
+                        startShooterFast();   // start shooter
+                        stateTimer.reset();   // start 1-second delay
+                        actionStarted = true; // mark that action has started
+                    }
 
-        // 2) Path2
-        followAndWait(paths.Path2);
+                    // After 1 second, feed the ball
+                    if (actionStarted && stateTimer.seconds() > 2.5) {
+                        feedOneBall();      // move to next state
+                        actionStarted = false; // reset flag for next state
+                    }
+                    if (actionStarted && stateTimer.seconds() > 3.5) {
+                        feedOneBall();      // move to next state
+                        actionStarted = false; // reset flag for next state
+                    }
+                    if (actionStarted && stateTimer.seconds() > 5) {
+                        feedOneBall();
+                        nextPathState();      // move to next state
+                        actionStarted = false; // reset flag for next state
+                    }
+                    break;
 
-        // After Path2: pause 0.5s and "spin up" magazine once
-        sleep(500);
-        spinUp();
 
-        // 3) Path3
-        followAndWait(paths.Path3);
+                case 1:
+                    if (!follower.isBusy()) {
+                        follower.followPath(paths.Path2);
+                        nextPathState();
+                    }
+                    break;
 
-        // After Path3: pause 0.5s and spin up again
-        sleep(500);
-        spinUp();
+                case 2:
+                    if (!follower.isBusy()) {
+                        follower.followPath(paths.Path3);
+                        nextPathState();
+                    }
+                    break;
 
-        // 4) Path4
-        followAndWait(paths.Path4);
+                case 3:
+                    if (!follower.isBusy()) {
+                        follower.followPath(paths.Path4);
+                        nextPathState();
+                    }
+                    break;
 
-        // After Path4: pause 0.5s and spin up again
-        sleep(500);
-        spinUp();
+                case 4:
+                    if (!follower.isBusy()) {
+                        follower.followPath(paths.Path5);
+                        nextPathState();
+                    }
+                    break;
 
-        // 5) Path5
-        followAndWait(paths.Path5);
+                case 5:
+                    if (!follower.isBusy()) {
+                        follower.followPath(paths.Path6);
+                        nextPathState();
+                    }
+                    break;
 
-        // After Path5: pause for 5 seconds total,
-        // and during those 5 seconds feedOneBall 3 times with 0.5s between them.
-        long windowStart = System.currentTimeMillis();
-        for (int i = 0; i < 3; i++) {
-            feedOneBall();          // uses your helper, includes servo + spinUp
-            if (i < 2) {
-                sleep(500);         // 0.5s between balls
+                case 6:
+                    if (!follower.isBusy()) {
+                        follower.followPath(paths.Path7);
+                        // Example motor action: shoot one ball
+
+                        feedOneBall();
+                        nextPathState();
+                    }
+                    break;
+
+                case 7:
+                    if (!follower.isBusy()) {
+                        follower.followPath(paths.Path8);
+                        rollerOn();
+                        sleep(500); // intake for a short period
+                        rollerOff();
+                        nextPathState();
+                    }
+                    break;
+
+                case 8:
+                    if (!follower.isBusy()) {
+                        follower.followPath(paths.Path9);
+                        stopShooter();
+                        nextPathState();
+                    }
+                    break;
+
+                case 9:
+                    if (!follower.isBusy()) {
+                        pathState = -1; // finished
+                    }
+                    break;
             }
-        }
-        long elapsed = System.currentTimeMillis() - windowStart;
-        long remaining = 5000 - elapsed;
-        if (remaining > 0) {
-            sleep(remaining);       // make sure total pause ~5 seconds
+
+            // Telemetry
+            telemetry.addData("Path State", pathState);
+            telemetry.addData("X", follower.getPose().getX());
+            telemetry.addData("Y", follower.getPose().getY());
+            telemetry.addData("Heading (deg)", Math.toDegrees(follower.getPose().getHeading()));
+            telemetry.update();
         }
 
-        // Optional: clean up at end
-        stopRoller();
-        // stopShooter();           // comment out if you truly want it spinning until the OpMode ends
-
-        telemetry.addLine("BlueFar Auto Complete");
+        // Final cleanup
+        stopShooter();
+        rollerOff();
+        telemetry.addLine("Autonomous Complete");
         telemetry.update();
+        sleep(2000);
     }
 
-    // ----------------- PATH DEFINITIONS -----------------
+    private void nextPathState() {
+        pathState++;
+    }
 
+    // ---------------- PATH CLASS ----------------
     public static class Paths {
 
-        public PathChain Path1;
-        public PathChain Path2;
-        public PathChain Path3;
-        public PathChain Path4;
-        public PathChain Path5;
-        public PathChain Path6;
+        public PathChain line1, Path2, Path3, Path4, Path5, Path6, Path7, Path8, Path9;
 
         public Paths(Follower follower) {
-            Path1 = follower
-                    .pathBuilder()
-                    .addPath(
-                            new BezierLine(
-                                    new Pose(56.000, 7.500),
-                                    new Pose(56.000, 7.500)
-                            )
-                    )
-                    .setLinearHeadingInterpolation(Math.toRadians(90), Math.toRadians(108))
+
+            line1 = follower.pathBuilder()
+                    .addPath(new BezierLine(new Pose(56, 7.6), new Pose(56, 11)))
+                    .setLinearHeadingInterpolation(Math.toRadians(90), Math.toRadians(110))
                     .build();
 
-            Path2 = follower
-                    .pathBuilder()
-                    .addPath(
-                            new BezierCurve(
-                                    new Pose(56.000, 7.500),
-                                    new Pose(51.900, 37.037),
-                                    new Pose(40.000, 35.000)
-                            )
-                    )
-                    .setLinearHeadingInterpolation(Math.toRadians(108), Math.toRadians(180))
+            Path2 = follower.pathBuilder()
+                    .addPath(new BezierCurve(new Pose(56, 12), new Pose(59.308, 35.585), new Pose(40, 36)))
+                    .setLinearHeadingInterpolation(Math.toRadians(110), Math.toRadians(180))
                     .build();
 
-            Path3 = follower
-                    .pathBuilder()
-                    .addPath(
-                            new BezierLine(
-                                    new Pose(40.000, 35.000),
-                                    new Pose(36.000, 35.000)
-                            )
-                    )
+            Path3 = follower.pathBuilder()
+                    .addPath(new BezierLine(new Pose(40, 36), new Pose(34, 36)))
                     .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(180))
                     .build();
 
-            Path4 = follower
-                    .pathBuilder()
-                    .addPath(
-                            new BezierLine(
-                                    new Pose(36.000, 35.000),
-                                    new Pose(31.000, 35.000)
-                            )
-                    )
-                    .setTangentHeadingInterpolation()
+            Path4 = follower.pathBuilder()
+                    .addPath(new BezierLine(new Pose(34, 36), new Pose(29, 36)))
+                    .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(180))
                     .build();
 
-            Path5 = follower
-                    .pathBuilder()
-                    .addPath(
-                            new BezierLine(
-                                    new Pose(31.000, 35.000),
-                                    new Pose(25.000, 35.000)
-                            )
-                    )
-                    .setTangentHeadingInterpolation()
+            Path5 = follower.pathBuilder()
+                    .addPath(new BezierLine(new Pose(29, 36), new Pose(24, 36)))
+                    .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(180))
                     .build();
 
-            Path6 = follower
-                    .pathBuilder()
-                    .addPath(
-                            new BezierLine(
-                                    new Pose(25.000, 35.000),
-                                    new Pose(59.000, 10.600)
-                            )
-                    )
-                    .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(115))
+            Path6 = follower.pathBuilder()
+                    .addPath(new BezierCurve(new Pose(28, 36), new Pose(78.761, 48.633), new Pose(55.987, 7.829)))
+                    .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(110))
+                    .build();
+
+            Path7 = follower.pathBuilder()
+                    .addPath(new BezierCurve(new Pose(55.987, 7.829), new Pose(65.951, 63.578), new Pose(39, 59.5)))
+                    .setLinearHeadingInterpolation(Math.toRadians(110), Math.toRadians(180))
+                    .build();
+
+            Path8 = follower.pathBuilder()
+                    .addPath(new BezierLine(new Pose(39, 59.5), new Pose(32, 59.5)))
+                    .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(180))
+                    .build();
+
+            Path9 = follower.pathBuilder()
+                    .addPath(new BezierLine(new Pose(32, 59.5), new Pose(18, 54)))
+                    .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(180))
                     .build();
         }
     }
 
-    // ----------------- YOUR HARDWARE HELPERS -----------------
+    // ---------------- HARDWARE HELPER FUNCTIONS ----------------
 
-    // Roller on
-    private void roller() {
-        roller.setPower(0.80);
-    }
+    private void rollerOn() { roller.setPower(0.8); }
+    private void rollerOff() { roller.setPower(0.0); }
 
-    // Roller off
-    private void stopRoller() {
-        roller.setPower(0);
-    }
+    private void startShooterFast() { shooterMotor.setVelocity(-1400); }
+    private void startShooterSlow() { shooterMotor.setVelocity(-990); }
+    private void stopShooter() { shooterMotor.setPower(0.0); }
 
-    // Shooter fast (launch speed)
-    private void startShooterFast() {
-        shooterMotor.setVelocity(1400);   // tune as needed
-    }
-
-    // Shooter slow (kept from your original, even if unused for now)
-    private void startShooterSlow() {
-        shooterMotor.setVelocity(990);    // tune as needed
-    }
-
-    private void stopShooter() {
-        shooterMotor.setPower(0.0);
-    }
-
-    // "Spin up" magazine: move to next ball
-    private void spinUp() {
-        positions -= 250;                 // spin to next ball (tune if needed)
-        magazine.setPower(0.7);
-        magazine.setTargetPosition(positions);
-    }
-
-    // Feed one ball into shooter and advance mag
     private void feedOneBall() throws InterruptedException {
-        positions -= 250;                 // next ball position
         feederServo.setPosition(0.6);
         sleep(200);
-        feederServo.setPosition(0.05);
+        feederServo.setPosition(0);
         sleep(300);
+
+        positions -= 250;
         magazine.setPower(0.7);
         magazine.setTargetPosition(positions);
-    }
-
-    // ----------------- FOLLOW HELPER -----------------
-
-    private void followAndWait(PathChain path) {
-        follower.followPath(path);
-        while (opModeIsActive() && follower.isBusy()) {
-            follower.update();
-            telemetry.addData("X", follower.getPose().getX());
-            telemetry.addData("Y", follower.getPose().getY());
-            telemetry.addData("Heading", follower.getPose().getHeading());
-            telemetry.update();
-        }
     }
 }
