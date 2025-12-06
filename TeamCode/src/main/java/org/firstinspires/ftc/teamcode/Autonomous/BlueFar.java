@@ -105,7 +105,7 @@ public class BlueFar extends LinearOpMode {
                     }
                     if (actionStarted && stateTimer.seconds() > 2.5) {
                         feedOneBall();      // move to next state
-                        actionStarted = true; // reset flag for next state
+                        actionStarted = true; 
                     }
 
                     break;
