@@ -174,7 +174,7 @@ public class BlueClose extends LinearOpMode {
         public Paths(Follower follower) {
 
             line1 = follower.pathBuilder()
-                    .addPath(new BezierLine(new Pose(21, 124), new Pose(41, 103)))
+                    .addPath(new BezierLine(new Pose(21, 124), new Pose(50, 102)))
                     .setLinearHeadingInterpolation(Math.toRadians(145), Math.toRadians(145))
                     .build();
 
