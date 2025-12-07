@@ -108,12 +108,14 @@ public class teleop extends LinearOpMode {
 
             }
             detected = bench.getDetectedColor(telemetry);
+           /*
             if (gamepad1.crossWasPressed()) {
 
                 autoIntake = !autoIntake;
                 spun = false;
             }
             // Commented out for now test how it works    spun = false;
+
             if (autoIntake) {
                 if (detected == TestBenchColor.DetectedColor.TAN) {
                     intake.setPower(0.8);
@@ -121,7 +123,7 @@ public class teleop extends LinearOpMode {
                 }
                 if (detected == TestBenchColor.DetectedColor.UNKNOWN && !spun) {
                     magazine.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                    magazine.setPower(0.7);
+                    magazine.setPower(0.3);
                     positions = positions - 250;
                     magazine.setTargetPosition(positions);
                     spun = true;
@@ -129,6 +131,7 @@ public class teleop extends LinearOpMode {
             } else {
                 intake.setPower(0);
             }
+            */
 
 //                    intake.setPower(0);
 //                }
