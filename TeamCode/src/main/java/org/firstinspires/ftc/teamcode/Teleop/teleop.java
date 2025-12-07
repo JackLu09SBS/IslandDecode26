@@ -5,17 +5,20 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.NormalizedRGBA;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import org.firstinspires.ftc.teamcode.Mechanisms.TestBenchColor;
 import java.util.concurrent.TimeUnit;
-
+import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
+import com.qualcomm.robotcore.hardware.NormalizedRGBA;
 @TeleOp
 public class teleop extends LinearOpMode {
     boolean isAutoRunning = false;
 
-    TestBenchColor colorDetector = new TestBenchColor();
+
+    TestBenchColor bench = new TestBenchColor();
     int positions = 0;
 
     ElapsedTime autoTimer = new ElapsedTime();
@@ -23,6 +26,7 @@ public class teleop extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
         // Declare our motors
+
         DcMotor frontLeftMotor = hardwareMap.dcMotor.get("leftFront");
         DcMotor backLeftMotor = hardwareMap.dcMotor.get("leftBack");
         DcMotor frontRightMotor = hardwareMap.dcMotor.get("rightFront");
@@ -31,19 +35,17 @@ public class teleop extends LinearOpMode {
         DcMotor intake = hardwareMap.dcMotor.get("intake");
         DcMotor magazine = hardwareMap.dcMotor.get("magazine");
         Servo servo = hardwareMap.servo.get("servo");
-     //   ColorSensor colorSensor = hardwareMap.get(ColorSensor.class, "colorSensor");
+        bench.init(hardwareMap);
         shooter.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         shooter.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         shooter.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
         magazine.setTargetPosition(0);
         magazine.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        colorDetector.init(hardwareMap);
         // Reverse the left side motors.
         frontRightMotor.setDirection(DcMotorSimple.Direction.FORWARD);
         backRightMotor.setDirection(DcMotorSimple.Direction.FORWARD);
         frontLeftMotor.setDirection(DcMotorSimple.Direction.REVERSE);
         backLeftMotor.setDirection(DcMotorSimple.Direction.REVERSE);
- //       colorSensor.enabled(true);  // Turn on sensor's LED
 
         // Constants
         boolean intakeOn = false;
@@ -64,7 +66,6 @@ public class teleop extends LinearOpMode {
         if (isStopRequested()) return;
 
         while (opModeIsActive()) {
-
             //telemetry.update();
             double y = -gamepad1.left_stick_y; //front-back;  remember, Y stick value is reversed
             double x = gamepad1.left_stick_x; //left-right
@@ -79,11 +80,8 @@ public class teleop extends LinearOpMode {
             double backLeftPower = (y - x + rx) / denominator;
             double frontRightPower = (y - x - rx) / denominator;
             double backRightPower = (y + x - rx) / denominator;
-            //double frontLeftPower1 = frontLeftPower * Math.abs(frontLeftPower);
-            //double backLeftPower1 = backLeftPower * Math.abs(backLeftPower);
-            //double frontRightPower1 = frontRightPower * Math.abs(frontRightPower);
-            //double backRightPower1 = backRightPower * Math.abs(backRightPower);
-            //slow mode
+            TestBenchColor.DetectedColor detected = bench.getDetectedColor(telemetry);
+
             if (gamepad1.left_trigger > 0 || gamepad1.right_trigger > 0) {
                 frontLeftMotor.setPower(frontLeftPower);
                 backLeftMotor.setPower(backLeftPower);
@@ -103,14 +101,13 @@ public class teleop extends LinearOpMode {
                 sleep(300);
                 servo.setPosition(0.6);
                 sleep(400);
-
-
                 magazine.setTargetPosition(positions);
                 magazine.setPower(0.7);
 
 
             }
-            TestBenchColor.DetectedColor detectedColor = colorDetector.getDetectedColor(telemetry);
+
+
             if (gamepad1.crossWasPressed())
             {
                 autoIntake = !autoIntake;
@@ -118,14 +115,7 @@ public class teleop extends LinearOpMode {
             // Commented out for now test how it works    spun = false;
                 if (autoIntake)
                 {
-               /*     boolean isTan = g > 50 && g < 80 && r > 30 && r < 50 && b > 30 && b < 55;
-                    telemetry.addData("Red", r);
-                    telemetry.addData("Green", g);
-                    telemetry.addData("Blue", b);
-                    telemetry.addData("Is Tan?", isTan);
-                    telemetry.update();
-                 */
-                    if (color ==TestBenchColor.DetectedColor.TAN) {
+                    if (detected == TestBenchColor.DetectedColor.TAN) {
                         intake.setPower(0.8);
                         timer.reset();
                         spun = false;
@@ -165,8 +155,7 @@ public class teleop extends LinearOpMode {
 
                     positions = positions - 250;
                     magazine.setTargetPosition(positions);
-
-                    magazine.setPower(0.3);
+                    magazine.setPower(0.7);
                 }
                 if (gamepad1.dpadRightWasPressed()) {
                     positions = positions + 30;
@@ -181,20 +170,23 @@ public class teleop extends LinearOpMode {
                     magazine.setPower(1.0);
                 }
 
-                //              telemetry.addData("Current Position", magazine.getCurrentPosition());
          /*
 
           */
-            if (gamepad1.right_stick_button) {
-                ShooterRunning = !ShooterRunning;
-                if (ShooterRunning) {
-                    shooter.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-                    shooter.setVelocity(shooterVelocityFar); // ? Pid to control velocity
+            if (gamepad1.right_stick_button)
+                {
+                  ShooterRunning = !ShooterRunning;
+                   if (ShooterRunning)
+                   {
+                       shooter.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                       shooter.setVelocity(shooterVelocityFar); // ? Pid to control velocity
 
-                } else {
-                    shooter.setPower(0);
+                   }
+                   else
+                   {
+                       shooter.setPower(0);
+                   }
                 }
-            }
                 if (gamepad1.circleWasPressed()) {
                     servo.setPosition(0.6);
                     sleep(100);
@@ -205,12 +197,7 @@ public class teleop extends LinearOpMode {
                     if (rotationTimes == 2%3){
                         rotationTimes = rotationTimes + 1;
                     }
-
-
-
                 }
-
-
                 if (gamepad1.leftBumperWasPressed()) {
                     intakeReverse = !intakeReverse;
                     intakeOn = false;
@@ -230,6 +217,8 @@ public class teleop extends LinearOpMode {
                     }
 
                 }
+                telemetry.addData("Detected Color", detected);
+                telemetry.update();
             }
         }
     }
